@@ -286,8 +286,24 @@ function showMoveInfo(){
   if(cl!=='best'&&cl!=='brilliant'&&cl!=='great'&&cl!=='book'&&bestU){ extra=` · best was ${bestU.slice(0,2)}–${bestU.slice(2,4)}`; }
   $('moveinfo').innerHTML=`<span class="c-${cl}">${CURRENT.sans[ply-1]} — ${names[cl]||cl}</span>${extra}`;
 }
-$('nFirst').onclick=()=>{ply=0;refresh();}; $('nPrev').onclick=()=>{if(ply>0){ply--;refresh();}};
-$('nNext').onclick=()=>{if(ply<CURRENT.sans.length){ply++;refresh();}}; $('nLast').onclick=()=>{ply=CURRENT.sans.length;refresh();};
+// On mobile, clicking nav buttons shifts browser focus and triggers an unwanted
+// scroll-to-element. Blur the button immediately and pin the board in view instead.
+function navAction(btn, fn) {
+  btn.addEventListener('click', e => {
+    fn();
+    // Blur so mobile Safari doesn't scroll to the focused button
+    e.currentTarget.blur();
+    // On narrow screens keep the board visible, not the button bar
+    if (window.innerWidth <= 760) {
+      const boardEl = $('board');
+      if (boardEl) boardEl.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    }
+  });
+}
+navAction($('nFirst'), () => { ply = 0; refresh(); });
+navAction($('nPrev'),  () => { if (ply > 0) { ply--; refresh(); } });
+navAction($('nNext'),  () => { if (ply < CURRENT.sans.length) { ply++; refresh(); } });
+navAction($('nLast'),  () => { ply = CURRENT.sans.length; refresh(); });
 document.addEventListener('keydown',e=>{ if($('analyzer').style.display==='none')return; if(e.key==='ArrowLeft')$('nPrev').click(); if(e.key==='ArrowRight')$('nNext').click(); });
 
 // ── engine ──

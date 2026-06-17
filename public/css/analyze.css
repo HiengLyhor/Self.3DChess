@@ -188,4 +188,45 @@ body.analyze-body { position: static; height: auto; min-height: 100%; overflow-y
 .b-good      { background: #b9c46e; } .b-book      { background: #b39064; } .b-inaccuracy{ background: #e3c84b; } .b-mistake   { background: #e09a4b; } .b-blunder   { background: #e0594b; }
 
 /* ─── Responsive ────────────────────────────────────────────────────────── */
-@media (max-width: 760px) { .az-main { flex-direction: column; } .az-side { width: 100%; } }
+@media (max-width: 760px) {
+  .az-main { flex-direction: column; }
+  .az-side { width: 100%; }
+
+  /* Push page content up so the fixed nav bar doesn't cover the last element */
+  .az-analyzer { padding-bottom: 80px; }
+
+  /* Sticky nav bar — always visible at bottom of screen on mobile */
+  .nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    gap: 0;
+    padding: 8px 12px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom)); /* iPhone notch */
+    background: rgba(13, 11, 8, 0.97);
+    border-top: 1px solid rgba(122, 99, 48, 0.35);
+    backdrop-filter: blur(8px);
+  }
+
+  .nav button {
+    flex: 1;
+    height: 48px;          /* Larger tap target */
+    font-size: 1.3rem;
+    border-radius: 0;
+    border: none;
+    border-right: 1px solid rgba(122, 99, 48, 0.2);
+    background: transparent;
+    color: var(--gold);
+  }
+  .nav button:last-child { border-right: none; }
+  .nav button:active { background: rgba(201, 168, 76, 0.15); }
+
+  /* Move info sits just above the fixed nav — keep it visible */
+  .moveinfo {
+    text-align: center;
+    padding: 6px 4px 2px;
+  }
+}
