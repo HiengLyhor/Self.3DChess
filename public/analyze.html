@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Analyze · The Board Room</title>
+  <link rel="stylesheet" href="/css/style.css?v=7" />
+  <link rel="stylesheet" href="/css/analyze.css?v=2" />
+</head>
+
+<body class="analyze-body">
+  <header class="az-header">
+    <a class="az-back" href="/">← Board</a>
+    <span class="az-title">Game Analysis</span>
+    <span class="az-spacer"></span>
+  </header>
+
+  <!-- SOURCE PICKER -->
+  <section id="picker" class="az-picker">
+    <div class="az-tabs">
+      <button class="az-tab active" data-tab="mine">My games</button>
+      <button class="az-tab" data-tab="chesscom">Import from Chess.com</button>
+    </div>
+
+    <div id="tab-mine" class="az-tabpane">
+      <p class="az-hint" id="mine-empty" style="display:none">No saved games yet. Finish a game on the board and it'll
+        appear here.</p>
+      <div id="mine-list" class="game-grid"></div>
+    </div>
+
+    <div id="tab-chesscom" class="az-tabpane" style="display:none">
+      <div class="cc-form">
+        <input id="cc-user" placeholder="chess.com username" autocomplete="off" />
+        <select id="cc-month"></select>
+        <button id="cc-load" class="btn-primary">Load games</button>
+      </div>
+      <div id="cc-msg" class="az-hint"></div>
+      <div id="cc-list" class="game-grid"></div>
+    </div>
+  </section>
+
+  <!-- ANALYZER -->
+  <section id="analyzer" class="az-analyzer" style="display:none">
+    <button id="az-toGames" class="az-link">← Games</button>
+    <div class="az-main">
+      <div class="board-wrap">
+        <div id="evalbar" class="evalbar">
+          <div id="evalfill" class="evalfill"></div><span id="evalnum" class="evalnum">0.0</span>
+        </div>
+        <div id="board" class="board2d"></div>
+      </div>
+      <aside class="az-side">
+        <div class="players">
+          <div class="pl"><span id="pl-white" class="pl-name">⚪ White</span><span id="acc-white" class="pl-acc">—</span>
+          </div>
+          <div class="pl"><span id="pl-black" class="pl-name">⚫ Black</span><span id="acc-black" class="pl-acc">—</span>
+          </div>
+        </div>
+
+        <div class="az-controls">
+          <select id="depth">
+            <option value="10">Fast (d10)</option>
+            <option value="13" selected>Balanced (d13)</option>
+            <option value="16">Deep (d16)</option>
+          </select>
+          <button id="run" class="btn-primary">Analyze game</button>
+        </div>
+        <div id="progress" class="progress hidden">
+          <div id="progbar" class="progbar"></div><span id="progtxt"></span>
+        </div>
+
+        <div id="summary" class="summary hidden"></div>
+        <svg id="graph" class="evalgraph" viewBox="0 0 300 90" preserveAspectRatio="none"></svg>
+
+        <div id="movelist" class="movelist"></div>
+
+        <div class="nav">
+          <button id="nFirst">⏮</button><button id="nPrev">◀</button>
+          <button id="nNext">▶</button><button id="nLast">⏭</button>
+        </div>
+        <div id="moveinfo" class="moveinfo"></div>
+      </aside>
+    </div>
+  </section>
+
+  <script type="module" src="/js/analyze.js?v=2"></script>
+</body>
+
+</html>

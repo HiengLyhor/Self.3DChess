@@ -1,0 +1,4 @@
+2D chess piece SVGs — "cburnett" set
+By Colin M.L. Burnett. Source: lichess-org/lila (public/piece/cburnett).
+Licensed GPLv2+ / also available CC-BY-SA 3.0 via Wikimedia Commons.
+Used here for the 2D analysis board and game previews.

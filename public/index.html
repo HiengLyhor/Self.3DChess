@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>The Board Room</title>
+  <link rel="stylesheet" href="/css/style.css?v=7" />
+</head>
+<body>
+
+  <!-- LOBBY -->
+  <div id="screen-lobby" class="screen active">
+    <div class="lobby-center">
+      <h1 class="title">THE BOARD ROOM</h1>
+      <p class="subtitle">A game of presence and patience.</p>
+      <div class="side-select">
+        <span class="side-label">Play as</span>
+        <div class="side-options">
+          <button class="side-btn active" data-side="white">White</button>
+          <button class="side-btn" data-side="black">Black</button>
+          <button class="side-btn" data-side="random">Random</button>
+        </div>
+      </div>
+      <div class="lobby-actions">
+        <button id="btn-create" class="btn-primary">Create Game</button>
+        <div class="divider">or</div>
+        <div class="join-row">
+          <input id="input-code" type="text" maxlength="6" placeholder="ROOM CODE" />
+          <button id="btn-join" class="btn-secondary">Join</button>
+        </div>
+      </div>
+      <div id="lobby-msg" class="lobby-msg"></div>
+      <a href="/analyze.html" class="az-lobby-link">⌕ Analyze games</a>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="screen-game" class="screen">
+    <canvas id="canvas"></canvas>
+
+    <div id="hud">
+      <div id="turn-indicator" class="hud-pill">Waiting…</div>
+      <div id="status-msg" class="hud-status"></div>
+    </div>
+
+
+    <!-- captured pieces trays -->
+    <div id="tray-top" class="tray hidden"><span class="tray-pieces"></span><span class="tray-adv"></span></div>
+    <div id="tray-bottom" class="tray hidden"><span class="tray-pieces"></span><span class="tray-adv"></span></div>
+
+    <!-- top-right actions -->
+    <div id="game-controls" class="game-controls hidden">
+      <button id="btn-takeback" class="ctrl-btn" title="Request takeback">↩ Takeback</button>
+      <button id="btn-draw" class="ctrl-btn" title="Offer draw">½ Draw</button>
+      <button id="btn-surrender" class="ctrl-btn ctrl-danger" title="Surrender">⚑ Resign</button>
+    </div>
+
+    <!-- waiting banner -->
+    <div id="wait-banner" class="wait-banner hidden">
+      <span class="code-label">SHARE THIS CODE</span>
+      <span id="display-code" class="code-value">------</span>
+      <button id="btn-copy" class="btn-copy">Copy invite link</button>
+      <p class="wait-text">Waiting for opponent to sit down…</p>
+    </div>
+
+    <div id="controls-overlay">
+      <button id="btn-reset" class="btn-reset hidden">Reset Board</button>
+    </div>
+
+    <!-- slam button (works on mobile + desktop) -->
+    <button id="btn-slam" class="slam-fab" title="Slam the board (F)">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2 L3 14 h7 l-1 8 L21 9 h-7 z"/>
+      </svg>
+      <span id="slam-count" class="slam-count">5</span>
+    </button>
+
+    <!-- game over -->
+    <div id="gameover-overlay" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h2 id="go-title">Checkmate</h2>
+        <p id="go-sub">You win.</p>
+        <div class="modal-actions">
+          <button id="btn-rematch" class="btn-primary">Rematch</button>
+          <button id="btn-analyze" class="btn-secondary">⌕ Analyze</button>
+          <button id="btn-back" class="btn-secondary">Back to lobby</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- generic confirm / incoming modal -->
+    <div id="confirm-overlay" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h2 id="cf-title">Confirm</h2>
+        <p id="cf-sub"></p>
+        <div class="modal-actions">
+          <button id="cf-yes" class="btn-primary">Yes</button>
+          <button id="cf-no" class="btn-secondary">No</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+    <div id="check-flash" class="check-flash hidden"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/game.js?v=7"></script>
+</body>
+</html>
