@@ -1,11 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>The Board Room</title>
   <link rel="stylesheet" href="/css/style.css?v=7" />
+  <!-- Link to the manifest file -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Meta tags for mobile styling -->
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <!-- Register the Service Worker script -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('Service Worker registered!', reg))
+          .catch(err => console.error('Service Worker registration failed:', err));
+      });
+    }
+  </script>
 </head>
+
 <body>
 
   <!-- LOBBY -->
@@ -69,8 +90,9 @@
 
     <!-- slam button (works on mobile + desktop) -->
     <button id="btn-slam" class="slam-fab" title="Slam the board (F)">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M13 2 L3 14 h7 l-1 8 L21 9 h-7 z"/>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2 L3 14 h7 l-1 8 L21 9 h-7 z" />
       </svg>
       <span id="slam-count" class="slam-count">5</span>
     </button>
@@ -109,4 +131,5 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/game.js?v=7"></script>
 </body>
+
 </html>
