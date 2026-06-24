@@ -281,10 +281,30 @@ function refresh(){
 }
 function showMoveInfo(){
   if(ply<=0){ $('moveinfo').textContent='Starting position.'; return; }
-  const cl=analysis.classes[ply-1]; const names={brilliant:'Brilliant!!',great:'Great move!',best:'Best move',excellent:'Excellent',good:'Good',book:'Book move',inaccuracy:'Inaccuracy',mistake:'Mistake',blunder:'Blunder'};
-  const bestU=analysis.bests[ply-1]; let extra='';
-  if(cl!=='best'&&cl!=='brilliant'&&cl!=='great'&&cl!=='book'&&bestU){ extra=` · best was ${bestU.slice(0,2)}–${bestU.slice(2,4)}`; }
-  $('moveinfo').innerHTML=`<span class="c-${cl}">${CURRENT.sans[ply-1]} — ${names[cl]||cl}</span>${extra}`;
+  const cl = analysis.classes[ply-1];
+  const names = { brilliant:'Brilliant!!', great:'Great move!', best:'Best move',
+    excellent:'Excellent', good:'Good', book:'Book move',
+    inaccuracy:'Inaccuracy', mistake:'Mistake', blunder:'Blunder' };
+  const movedSan = CURRENT.sans[ply-1];
+  const bestSan  = analysis.bestSans[ply-1];
+  const isBest   = !bestSan || bestSan === movedSan;
+
+  let suggestion = '';
+  if (!isBest && (cl === 'inaccuracy' || cl === 'mistake' || cl === 'blunder')) {
+    suggestion = ` · <span style="color:var(--muted)">Best was <b style="color:var(--ivory)">${bestSan}</b></span>`;
+  } else if (cl === 'brilliant' || cl === 'great') {
+    suggestion = ` · <span style="color:var(--muted)">Engine's top choice too</span>`;
+  }
+
+  // centipawn loss
+  const mover = (ply-1)%2===0 ? 'w' : 'b';
+  const winBefore = winPct(analysis.evals[ply-1].cp);
+  const winAfter  = winPct(-analysis.evals[ply].cp);
+  const loss = Math.max(0, winBefore - winAfter);
+  const lossNote = loss >= 1 ? ` <span style="color:var(--muted);font-size:.7rem">(−${loss.toFixed(1)}% win chance)</span>` : '';
+
+  $('moveinfo').innerHTML =
+    `<span class="c-${cl}">${movedSan} — ${names[cl]||cl}</span>${lossNote}${suggestion}`;
 }
 // On mobile, clicking nav buttons shifts browser focus and triggers an unwanted
 // scroll-to-element. Blur the button immediately and pin the board in view instead.
@@ -309,7 +329,7 @@ document.addEventListener('keydown',e=>{ if($('analyzer').style.display==='none'
 // ── engine ──
 let engine=null;
 class Engine{
-  constructor(){ this.w=new Worker('/engine/stockfish.js'); this.cur=null; this.q=[]; this.info=[]; this._readyRes=null;
+  constructor(){ this.w=new Worker('/engine/stockfish16.js'); this.cur=null; this.q=[]; this.info=[]; this._readyRes=null;
     this.readyP=new Promise(r=>this._readyRes=r);
     this.w.onmessage=e=>this._msg(typeof e.data==='string'?e.data:(e.data&&e.data.data)||'');
     this.send('uci'); this.send('setoption name MultiPV value 2'); this.send('isready');
@@ -344,6 +364,14 @@ class Engine{
   _next(){ if(this.cur||!this.q.length)return; this.cur=this.q.shift(); this.info=[]; this.send('position fen '+this.cur.fen); this.send('go depth '+this.cur.depth); }
   stop(){ try{this.send('stop'); this.w.terminate();}catch(e){} engine=null; }
 }
+function uciToSan(fen, uci) {
+  if (!uci || uci === '(none)') return null;
+  try {
+    const c = new Chess(fen);
+    const mv = c.move({ from: uci.slice(0,2), to: uci.slice(2,4), promotion: uci[4] || 'q' });
+    return mv ? mv.san : null;
+  } catch { return null; }
+}
 function parseInfo(infos,bestmove){
   const byPv={}; for(const l of infos){ const m=/ multipv (\d+)/.exec(l); byPv[m?+m[1]:1]=l; }
   const ev=l=>{ if(!l)return null; const mt=/ score mate (-?\d+)/.exec(l); if(mt){const m=+mt[1]; return {mate:m, cp:m>0?100000-m*100:-100000-m*100};} const cp=/ score cp (-?\d+)/.exec(l); return {cp:cp?+cp[1]:0,mate:null}; };
@@ -368,7 +396,7 @@ async function runAnalysis(){
   const depth=+$('depth').value||13; const fens=CURRENT.fens, ucis=CURRENT.ucis;
   engine=new Engine(); await engine.readyP;
   $('progress').classList.remove('hidden'); $('run').disabled=true;
-  const evals=[],bests=[],eval2s=[];
+  const evals=[], bests=[], eval2s=[], bestSans=[];
   for(let i=0;i<fens.length;i++){
     const probe = new Chess(fens[i]);
     if (probe.game_over()) {
@@ -379,6 +407,7 @@ async function runAnalysis(){
     }
     const r=await engine.evaluate(fens[i],depth);
     evals.push(r.eval); bests.push(r.best); eval2s.push(r.eval2);
+    bestSans.push(uciToSan(fens[i], r.best));
     const pc=Math.round((i+1)/fens.length*100); $('progbar').style.width=pc+'%'; $('progtxt').textContent=`Analyzing ${i+1}/${fens.length}`;
   }
   engine.stop();
@@ -409,7 +438,7 @@ async function runAnalysis(){
   const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
   const accW=Math.round(accFromLoss(avg(lossW))*10)/10;
   const accB=Math.round(accFromLoss(avg(lossB))*10)/10;
-  analysis={evals,bests,eval2s,classes,whiteCp,accW,accB};
+  analysis = { evals, bests, bestSans, eval2s, classes, whiteCp, accW, accB };
   $('acc-white').textContent=accW+'%'; $('acc-black').textContent=accB+'%';
   $('progress').classList.add('hidden'); $('run').disabled=false;
   renderSummary(classes); drawGraph(whiteCp); renderMoveList(); refresh();
