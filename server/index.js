@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const fs = require('fs');
 const { nanoid } = require('nanoid');
 const chess = require('./chess');
 
@@ -44,6 +45,31 @@ app.get('/api/chesscom/:user/:year/:month', async (req, res) => {
     const r = await fetchChessCom(`/pub/player/${SAFE(req.params.user).toLowerCase()}/games/${y}/${m}`);
     res.status(r.status).type('application/json').send(r.body);
   } catch (e) { res.status(502).json({ error: 'fetch failed' }); }
+});
+
+
+// ── Share storage (flat JSON, 30-day auto-expire) ──
+const SHARE_DIR = path.join(__dirname, '../data/shares');
+if (!fs.existsSync(SHARE_DIR)) fs.mkdirSync(SHARE_DIR, { recursive: true });
+function genShareId(){ const c='abcdefghijkmnpqrstuvwxyz23456789'; let id=''; for(let i=0;i<8;i++) id+=c[Math.floor(Math.random()*c.length)]; return id; }
+function cleanOldShares(){ try{ const f=fs.readdirSync(SHARE_DIR); const cut=Date.now()-30*24*60*60*1000; f.forEach(f=>{ const fp=path.join(SHARE_DIR,f); try{if(fs.statSync(fp).mtimeMs<cut)fs.unlinkSync(fp);}catch{} }); }catch{} }
+cleanOldShares(); setInterval(cleanOldShares, 24*60*60*1000);
+
+app.post('/api/share', express.json({ limit: '512kb' }), (req, res) => {
+  try{
+    const { moves, meta, analysis } = req.body;
+    if(!moves||!Array.isArray(moves)||!moves.length) return res.status(400).json({error:'invalid'});
+    let id=genShareId();
+    while(fs.existsSync(path.join(SHARE_DIR,id+'.json'))) id=genShareId();
+    fs.writeFileSync(path.join(SHARE_DIR,id+'.json'), JSON.stringify({moves,meta:meta||{},analysis:analysis||null,created:Date.now()}));
+    res.json({id, url:'/analyze.html?s='+id});
+  }catch(e){ res.status(500).json({error:'save failed'}); }
+});
+app.get('/api/share/:id', (req, res) => {
+  const id=(req.params.id||'').replace(/[^a-z0-9]/g,'').slice(0,10);
+  const fp=path.join(SHARE_DIR,id+'.json');
+  if(!fs.existsSync(fp)) return res.status(404).json({error:'not found or expired'});
+  try{ res.json(JSON.parse(fs.readFileSync(fp,'utf8'))); }catch{ res.status(500).json({error:'read failed'}); }
 });
 
 // rooms: { code, host, guest, locked, state, hostColor, guestColor, slams, over }

@@ -6,7 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Analyze · The Board Room</title>
   <link rel="stylesheet" href="/css/style.css?v=7" />
-  <link rel="stylesheet" href="/css/analyze.css?v=2" />
+  <link rel="stylesheet" href="/css/analyze.css?v=3" />
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));
+  </script>
 </head>
 
 <body class="analyze-body">
@@ -84,7 +87,7 @@
     </div>
   </section>
 
-  <script type="module" src="/js/analyze.js?v=2"></script>
+  <script type="module" src="/js/analyze.js?v=6"></script>
 </body>
 
 </html>
